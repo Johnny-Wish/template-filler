@@ -29,7 +29,7 @@ The service runs on port 5000 by default. For security purposes, it is recommend
 | /uploads/nocheck      | GET    | Same as above.                                               |
 | /uploads/check        | POST   | Uploads a zip file and performs all checking.<br />If any check fails, renders an error page with stack trace; <br />Otherwise, redirect to the download URL for the output (zipped) folder. |
 | /uploads/nocheck      | POST   | Similar to above, but no checking will be performed.<br />The error page is only rendered if an internal error is captured. |
-| /downloads/<filename> | GET    | Downloads an output (zipped) folder<br />Users are redirected here upon uploading a zip file (and all checks are passed) |
+| /downloads/\<filename\> | GET    | Downloads an output (zipped) folder<br />Users are redirected here upon uploading a zip file (and all checks are passed) |
 
 ## Config
 
