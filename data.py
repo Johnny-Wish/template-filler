@@ -30,9 +30,3 @@ class SequenceData(AbstractData):
 
     def eval(self):
         return [Blob(str(v), atomic=True, separator=" ") for v in self.value]
-
-
-if __name__ == '__main__':
-    data = SequenceData("tag1", [123, 456, 789])
-    for b in data.eval():
-        print(b.serialize())

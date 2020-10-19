@@ -148,38 +148,3 @@ class Parser:
 
         return {tag: self.parse_word(s)}
 
-
-if __name__ == '__main__':
-    parser = Parser()
-    # words = ["some", "word", "__first_name__", "__last_name__", "__last_name__.", "'__last_name__."]
-    # for w in words:
-    #     print(parser.parse_word(w).serialize(ignore_unfilled=True))
-    #
-    # print(parser.parse_sentence("I am writing for __first_name__.").serialize(ignore_unfilled=True))
-    # print(parser.parse_sentence("I am writing for __first_name__ __last_name__.").serialize(ignore_unfilled=True))
-    # print(parser.parse_sentence("__sent_overall__"))
-    # print(parser.parse_sentence("__sent_overall__").serialize(ignore_unfilled=True))
-    #
-    # print(parser.parse_paragraph("""Hello, World. Hi, you. __sent_a__ Goodbye until next time."""))
-    # print(parser.parse_article("""
-    #     __date__
-    #     To whom it may concern,
-    #     I am writing this letter for __first_name__ __last_name__ to report __his__ academic performance in __project_name__.
-    #     __para_project_description__
-    #     __sent_overall__ __sent_assignment__ __sent_participation__ __sent_final__
-    #     __para_individual__
-    #     Sincerely,
-    #     __sign__
-    # """).serialize(ignore_unfilled=True))
-
-    # paragraph = "__sent_a__ __sent_b__ __sent_c__ __sent_d__ __sent_e__ __sent_f__"
-    # print(split_sentences(paragraph))
-    # print(parser.parse_paragraph(paragraph))
-    # print(parser.parse_paragraph(paragraph).serialize())
-    #
-    # paragraph = "To whom it may concern,"
-    # print(split_sentences(paragraph))
-    # print(parser.parse_paragraph(paragraph))
-    # print(parser.parse_paragraph(paragraph).serialize())
-
-    print(parser.parse("Hello World"))

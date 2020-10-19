@@ -210,32 +210,3 @@ class GenreFormer:
         genre = parser.parse_article(genre)
         return genre
 
-
-if __name__ == '__main__':
-    flock_fetcher = FlockFetcher("/tmp/flock")
-    # parser = Parser()
-    # d = flock_fetcher.fetch("sent_final", "final", "d")
-    # for k in d:
-    #     print(k, ":", d[k].eval().serialize(ignore_unfilled=True))
-
-    program_fetcher = ProjectInfoFetcher("/tmp/program_info")
-    # d = program_fetcher.fetch()
-    # for k in d:
-    #     print(k, ":", d[k].eval().serialize())
-
-    student_fetcher = StudentFetcher(root_dir="/tmp", name_list_path="eval.csv", flock_fetcher=flock_fetcher)
-    for s in student_fetcher.fetch():
-        for tag in s:
-            print(tag, ":", s[tag].serialize(ignore_unfilled=True))
-        print()
-
-    former = GenreFormer("/tmp/genre")
-    genre = former.get_genre()
-    # program_data = program_fetcher.fetch()
-    # student_data = student_fetcher.fetch()[0]
-    #
-    # genre = genre.fill(program_data)
-    # genre = genre.fill(student_data)
-    #
-    # print(genre.serialize())
-    # print(genre.list_unfilled_tags())
