@@ -26,7 +26,7 @@ class Fetcher:
 
 class FlockFetcher(Fetcher):
     def sample(self, col, cls, n_samples=1, replace=False, p=None):
-        fpath = os.path.join(self.root_dir, col, cls)
+        fpath = os.path.join(self.root_dir, col, cls + ".txt")
         if fpath in self.cache:
             possibilities = self.cache[fpath]
         else:
