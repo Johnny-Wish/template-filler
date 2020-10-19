@@ -31,3 +31,19 @@ The service runs on port 5000 by default. For security purposes, it is recommend
 | /uploads/nocheck      | POST   | Similar to above, but no checking will be performed.<br />The error page is only rendered if an internal error is captured. |
 | /downloads/<filename> | GET    | Downloads an output (zipped) folder<br />Users are redirected here upon uploading a zip file (and all checks are passed) |
 
+## Config
+
+Configurations are specified, in json format, in `config.json`. To override the default location of configs, set a `TEMPLATE_FILLER_CONFIG` environment variable, e.g.,
+
+```bash
+export TEMPLATE_FILLER_CONFIG="/tmp/config.json"
+```
+
+The following options are specified in config:
+
+| Keys               | Values                                                       | Type   |
+| ------------------ | ------------------------------------------------------------ | ------ |
+| ZIP_DIR            | folder to save all uploaded zip files                        | string |
+| EXTRACTED_DIR      | folder for extracting zip files and generating output        | string |
+| DOWNLOAD_DIR       | folder for saving generated output (zip files) and downloading | string |
+| MAX_CONTENT_LENGTH | maximum length for upload files, in bytes (B)                | number |
