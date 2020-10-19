@@ -88,32 +88,16 @@ class NameChecker:
         if target_last_name not in self.last_names:
             warnings.warn(f"Target last name not listed in {self.last_names}: \n {old_s}")
 
-        first_names = self.first_names - {target_first_name}
-        last_names = self.last_names - {target_last_name}
+        first_names = self.first_names - {target_first_name, target_last_name}
+        last_names = self.last_names - {target_first_name, target_last_name}
 
         for fn, ln in zip(first_names, last_names):
             if fn in s:
-                warnings.warn(f"Alien first name {fn} found: \n {old_s}")
+                warnings.warn(f'Alien first name "{fn}" found: \n {old_s}')
             if ln in s:
-                warnings.warn(f"Alien last name {ln} found: \n {old_s}")
+                warnings.warn(f'Alien last name "{ln}" found: \n {old_s}')
 
         if not (target_first_name in s):
             warnings.warn(f"Target first name not found: \n {old_s}")
         if not (target_last_name in s):
             warnings.warn(f"Target last name not found: \n {old_s}")
-
-
-if __name__ == '__main__':
-    # s = "He's my friend. Him too. What about herself?"
-    # GenderChecker().check(s)
-
-    # s1 = "Here is an underscore _ Does anyone see it?"
-    # s2 = "Here is a placeholder __first_name__ Does anyone see it?"
-    # PlaceholderChecker().check(s1)
-    # PlaceholderChecker().check(s2)
-
-    first_names = ["Alice", "Bob", "Charles", "Daniel"]
-    last_names = ["AAA", "BBB", "CCC", "DDD"]
-    s = "Alice is a good student. Her last name is AAA. She is a friend of Bob BBB"
-
-    NameChecker(first_names, last_names).check(s, "Alice", "AAa")
