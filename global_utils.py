@@ -1,3 +1,4 @@
+import datetime
 import string
 
 
@@ -13,3 +14,11 @@ def capitalize(s: str):
 
 def rreplace(s, old, new, max_replace=1):
     return new.join(s.rsplit(old, max_replace))
+
+
+def get_timestamp_str():
+    return str(datetime.datetime.now().timestamp()).replace(".", "")
+
+
+def get_time_str():
+    return str(datetime.datetime.now().strftime("20%y-%m-%d-%H-%M-%S"))
