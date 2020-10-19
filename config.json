@@ -1,0 +1,6 @@
+{
+  "ZIP_DIR": "/tmp/zip",
+  "EXTRACTED_DIR": "/tmp/extract",
+  "DOWNLOAD_DIR": "/tmp/download",
+  "MAX_CONTENT_LENGTH": 10485760
+}

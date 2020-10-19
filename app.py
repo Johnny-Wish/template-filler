@@ -1,14 +1,18 @@
+import json
+import os
 from file_manager import FileSystemManager
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
+from io_utils import read_textfile
 
 ALLOWED_EXTENSIONS = {'zip'}
 
+config_path = os.environ.get("TEMPLATE_FILLER_CONFIG", "config.json")
+
 app = Flask(__name__)
-app.config['ZIP_DIR'] = "/tmp/zip"
-app.config['EXTRACTED_DIR'] = "/tmp/extract"
-app.config['DOWNLOAD_DIR'] = "/tmp/download"
-app.config['MAX_CONTENT_PATH'] = 10 * 1024 * 1024
+content = read_textfile(config_path)
+cfg = json.loads(content)
+app.config.update(cfg)
 
 manager = FileSystemManager(
     zip_dir=app.config['ZIP_DIR'],
