@@ -1,7 +1,8 @@
 import os
+import sys
 from fetcher import StudentFetcher, ProjectInfoFetcher, GenreFormer, Fetcher, FlockFetcher
 from io_utils import safe_mkdir, DocxInsertionWriter
-from checker import NameChecker, GenderChecker, PlaceholderChecker
+from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer
 
 
 class Controller:
@@ -38,26 +39,38 @@ class Controller:
             propose_fname = os.path.join(output_dir, propose_fname)
             writer.write(content=content, fname=propose_fname)
 
-    def check_texts(self):
+    def check_texts(self, output="stderr"):
         all_first_names = [row["first_name"].eval().serialize() for row in self.student_data]
         all_last_names = [row["last_name"].eval().serialize() for row in self.student_data]
-        placeholder_checker = PlaceholderChecker()
-        gender_checker = GenderChecker()
-        name_checker = NameChecker(all_first_names, all_last_names)
 
-        print("list of names to check:")
-        for fn, ln in zip(all_first_names, all_last_names):
-            print(fn, ln)
-        print()
+        summarizer = CheckSummarizer()
+
+        placeholder_checker = PlaceholderChecker(summarizers=[summarizer])
+        gender_checker = GenderChecker(summarizers=[summarizer])
+        name_checker = NameChecker(all_first_names, all_last_names, summarizers=[summarizer])
 
         for content, row in zip(self.get_texts(), self.student_data):
             first_name = row['first_name'].eval().serialize()
             last_name = row['last_name'].eval().serialize()
-            print(f"Checking {first_name} {last_name}")
-            placeholder_checker.check(content)
-            gender_checker.check(content)
-            name_checker.check(content, target_first_name=first_name, target_last_name=last_name)
+            filename = f"{first_name} {last_name}"
+            print(f"Checking filename")
+            placeholder_checker.check(filename, content)
+            gender_checker.check(filename, content)
+            name_checker.check(filename, content, target_first_name=first_name, target_last_name=last_name)
             print()
+
+        summaries = summarizer.get_summaries()
+        if summaries is not None:
+            summaries = f"{len(summaries)} warning(s) found:" + "\n\n".join(summaries)
+            if output == "raise":
+                raise ValueError(summaries)
+            elif output == "stderr":
+                print(summaries, file=sys.stderr)
+            elif output == "stdout":
+                print(summaries)
+            else:
+                print("unrecognized output format")
+                print(summaries)
 
 
 if __name__ == '__main__':
