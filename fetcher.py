@@ -39,7 +39,7 @@ class FlockFetcher(Fetcher):
         else:
             return np.random.choice(possibilities, n_samples, replace=replace, p=p)
 
-    def fetch(self, tag, col, cls, n_samples=1, replace=False, p=None, sample_type='sentence', wrap_with="block"):
+    def fetch(self, tag, col, cls, n_samples=1, replace=False, p=None, sample_type='paragraph', wrap_with="block"):
         parser = Parser()
         samples = self.sample(col, cls, n_samples=n_samples, replace=replace, p=p)
         parsed_samples = [parser.parse(s, ret_type=sample_type) for s in samples]
