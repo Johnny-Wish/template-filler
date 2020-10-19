@@ -1,5 +1,6 @@
 import os
 import sys
+import zipfile
 from pathlib import Path
 from docx import Document
 from docx.text.paragraph import Paragraph
@@ -23,6 +24,24 @@ def read_docxfile(fpath):
 
 def safe_mkdir(directory):
     Path(directory).mkdir(parents=True, exist_ok=True)
+
+
+def extract_zip(src, dest):
+    with zipfile.ZipFile(src) as f:
+        f.extractall(path=dest)
+
+
+def zipdir(src, dest):
+    relroot = os.path.abspath(os.path.join(src, os.pardir))
+    with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as zip:
+        for root, dirs, files in os.walk(src):
+            # add directory (needed for empty dirs)
+            zip.write(root, os.path.relpath(root, relroot))
+            for file in files:
+                filename = os.path.join(root, file)
+                if os.path.isfile(filename):  # regular files only
+                    arcname = os.path.join(os.path.relpath(root, relroot), file)
+                    zip.write(filename, arcname)
 
 
 class Writer:
@@ -80,17 +99,3 @@ class DocxInsertionWriter(Writer):
 
         print(f"saving to {fname}")
         doc.save(fname)
-
-
-if __name__ == '__main__':
-    s = """
-    This is a sentence. And another one.
-    Another paragraph.
-
-    A third paragraph.
-    """
-    writer = DocxInsertionWriter("/tmp/template.docx", 0)
-    writer.write(s, "/tmp/abc.docx")
-
-
-    print(read_docxfile("/tmp/letters/Chenhao-Li-path-letter.docx"))
