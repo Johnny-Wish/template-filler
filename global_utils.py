@@ -9,3 +9,7 @@ def capitalize(s: str):
     if s[0] in string.ascii_lowercase:
         return s[0].upper() + s[1:]
     return s
+
+
+def rreplace(s, old, new, max_replace=1):
+    return new.join(s.rsplit(old, max_replace))
