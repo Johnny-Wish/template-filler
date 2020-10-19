@@ -14,7 +14,7 @@ class Controller:
         self.genre = genre_former.get_genre()
         self.genre.entry_separator = "\n\n"
         self.student_data = student_fetcher.fetch()
-        self.program_data = program_fetcher.fetch()
+        self.program_data = program_fetcher.fetch(verbatim=True)
 
         self.articles = [self.genre.fill(program_fetcher.fetch()).fill(student) for student in student_fetcher.fetch()]
         # self.articles = []
