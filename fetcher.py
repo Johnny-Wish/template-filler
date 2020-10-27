@@ -130,7 +130,10 @@ class StudentFetcher(Fetcher):
     def set_cache(self):
         if not os.path.isfile(self.name_list_path):
             raise FileNotFoundError(f"{self.name_list_path} is not a file")
-        self.cache = pd.read_csv(self.name_list_path)
+        try:
+            self.cache = pd.read_csv(self.name_list_path)
+        except:
+            self.cache = pd.read_csv(self.name_list_path, encoding='latin1')
 
         for col in self.basic_columns:
             if col not in self.cache.columns:
