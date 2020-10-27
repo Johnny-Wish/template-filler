@@ -173,6 +173,10 @@ class StudentFetcher(Fetcher):
             'him': Atom('him' if row['gender'] == "M" else 'her'),
             'his': Atom('his' if row['gender'] == "M" else 'her'),
             'himself': Atom('himself' if row['gender'] == "M" else 'herself'),
+            'He': Atom('He' if row['gender'] == "M" else 'She'),
+            'Him': Atom('Him' if row['gender'] == "M" else 'Her'),
+            'His': Atom('His' if row['gender'] == "M" else 'Her'),
+            'Himself': Atom('Himself' if row['gender'] == "M" else 'Herself'),
         }
 
         for col in ['participation', 'overall', 'assignment', 'final']:
@@ -209,4 +213,3 @@ class GenreFormer:
         parser = Parser()
         genre = parser.parse_article(genre)
         return genre
-
