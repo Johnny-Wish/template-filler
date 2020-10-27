@@ -132,8 +132,11 @@ class StudentFetcher(Fetcher):
             raise FileNotFoundError(f"{self.name_list_path} is not a file")
         try:
             self.cache = pd.read_csv(self.name_list_path)
-        except:
-            self.cache = pd.read_csv(self.name_list_path, encoding='latin1')
+        except UnicodeDecodeError as e:
+            raise ValueError(f"Unrecognized-encoding format; please encode the csv file in UTF-8 "
+                             f"(default encoding on macOS and Linux)."
+                             f"\nFor windows users, please paste to Google Sheet and download a CSV from there."
+                             f"\n{e}")
 
         for col in self.basic_columns:
             if col not in self.cache.columns:
