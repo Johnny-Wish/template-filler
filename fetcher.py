@@ -156,10 +156,10 @@ class StudentFetcher(Fetcher):
     def check_rows(self):
         for i, row in self.cache.iterrows():
             if row['gender'] not in ['M', 'F']:
-                raise ValueError(f"Unknown gender {row} for {row['first_name', 'last_name']} found")
+                raise ValueError(f"Unknown gender {row} for {row['first_name']} {row['last_name']} found")
             for col in ['assignment', 'participation', 'final', 'overall']:
                 if row[col] not in ['A', 'B', 'C', 'D']:
-                    raise ValueError(f"Unkonwn {col} grade for {row['first_name', 'last_name']} found")
+                    raise ValueError(f"Unknown {col} grade '{row[col]}' for {row['first_name']} {row['last_name']}")
 
     def fetch_flock(self, row, col, type='sentence'):
         if type == 'sentence':
