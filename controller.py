@@ -53,11 +53,10 @@ class Controller:
             first_name = row['first_name'].eval().serialize()
             last_name = row['last_name'].eval().serialize()
             filename = f"{first_name} {last_name}"
-            print(f"Checking filename")
+            print(f"Checking {filename}", end="\t")
             placeholder_checker.check(filename, content)
             gender_checker.check(filename, content)
             name_checker.check(filename, content, target_first_name=first_name, target_last_name=last_name)
-            print()
 
         summaries = summarizer.get_summaries()
         if summaries is not None:
