@@ -25,6 +25,11 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+@app.route('/')
+def index():
+    return redirect(url_for('upload_file_and_check', check='check'))
+
+
 @app.route('/uploads/<check>', methods=['GET', 'POST'])
 def upload_file_and_check(check):
     if check == "check" or check == "":
