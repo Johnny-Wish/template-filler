@@ -1,4 +1,5 @@
 import os
+import shutil
 from fetcher import FlockFetcher, ProjectInfoFetcher, GenreFormer, StudentFetcher
 from controller import Controller
 from io_utils import safe_mkdir, extract_zip, zipdir, DocxInsertionWriter
@@ -43,6 +44,7 @@ class FileSystemManager:
         # extract zip to a new folder
         extracted_path = os.path.join(self.EXTRACTED_DIR, rreplace(filename, ".zip", ""))
         extract_zip(src=uploaded_zip_path, dest=extracted_path)
+        os.remove(uploaded_zip_path)
 
         # instantiate a controller to handle the extracted folder
         controller = self.get_controller(extracted_path)
@@ -55,5 +57,6 @@ class FileSystemManager:
         # zip the docs folder and return download path
         download_path = os.path.join(self.DOWNLOAD_DIR, filename)
         zipdir(letter_dir, download_path)
+        shutil.rmtree(extracted_path)
 
         return filename
