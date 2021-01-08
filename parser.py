@@ -66,8 +66,9 @@ def split_sentences(s: str):
 
 
 class Parser:
-    def parse_word(self, s):
-        check_no_whitespace(s)
+    def parse_word(self, s, allow_space=False):
+        if not allow_space:
+            check_no_whitespace(s)
         tags = re.findall(ANY_TAG, s)
         if len(tags) == 0:
             return Atom(s)
@@ -144,7 +145,7 @@ class Parser:
         elif tag.startswith("sent_"):
             return {tag: self.parse_sentence(s)}
         elif tag.startswith("tag_"):
-            return {tag: self.parse_word(s)}
+            return {tag: self.parse_word(s, allow_space=True)}
 
         return {tag: self.parse_word(s)}
 
