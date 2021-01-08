@@ -31,7 +31,7 @@ class FlockFetcher(Fetcher):
             possibilities = self.cache[fpath]
         else:
             text = read_textfile(fpath)
-            possibilities = [poss for poss in text.split('\n') if len(poss.strip()) != 0]
+            possibilities = [poss.strip() for poss in text.split('\n') if len(poss.strip()) != 0]
             self.cache[fpath] = possibilities
 
         if n_samples is None:
