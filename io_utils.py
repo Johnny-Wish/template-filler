@@ -22,6 +22,12 @@ def read_docxfile(fpath):
     return "\n".join(p.text for p in Document(fpath).paragraphs)
 
 
+def read_pdf(fpath):
+    from tika import parser
+    raw = parser.from_file(fpath)
+    return raw['content'].strip()
+
+
 def safe_mkdir(directory):
     Path(directory).mkdir(parents=True, exist_ok=True)
 
