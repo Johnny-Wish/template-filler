@@ -3,6 +3,7 @@ import sys
 from fetcher import StudentFetcher, ProjectInfoFetcher, GenreFormer, Fetcher, FlockFetcher
 from io_utils import safe_mkdir, DocxInsertionWriter
 from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer
+import argparse
 
 
 class Controller:
@@ -73,12 +74,15 @@ class Controller:
 
 
 if __name__ == '__main__':
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--pre-para-id', default=0, type=int)
+    args = arg_parser.parse_args()
     flock_fetcher = FlockFetcher("./flock")
     program_fetcher = ProjectInfoFetcher("./program_info")
     student_fetcher = StudentFetcher(root_dir=".", name_list_path="eval.csv", flock_fetcher=flock_fetcher)
     former = GenreFormer("./genre")
 
-    writer = DocxInsertionWriter(template_path="./style.docx", pre_para_id=0)
+    writer = DocxInsertionWriter(template_path="./style.docx", pre_para_id=args.pre_para_id)
 
     controller = Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher)
     controller.check_texts()
