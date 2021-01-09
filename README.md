@@ -47,3 +47,5 @@ The following options are specified in config:
 | EXTRACTED_DIR      | folder for extracting zip files and generating output        | string |
 | DOWNLOAD_DIR       | folder for saving generated output (zip files) and downloading | string |
 | MAX_CONTENT_LENGTH | maximum length for upload files, in bytes (B)                | number |
+| SECRET_KEY         | default secret key; must be longer than 24 characters        | string |
+
