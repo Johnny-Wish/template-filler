@@ -1,5 +1,7 @@
 import json
+import sys
 import os
+import warnings
 from file_manager import FileSystemManager
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
@@ -13,6 +15,12 @@ app = Flask(__name__)
 content = read_textfile(config_path)
 cfg = json.loads(content)
 app.config.update(cfg)
+
+secret_key = os.environ.get('FLASK_SECRET_KEY', None)
+if secret_key is None:
+    secret_key = os.urandom(24)
+    print(f"No secret key is set. Randomly generating a new one: {secret_key}", file=sys.stderr)
+app.secret_key = secret_key
 
 manager = FileSystemManager(
     zip_dir=app.config['ZIP_DIR'],
