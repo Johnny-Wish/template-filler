@@ -16,10 +16,14 @@ content = read_textfile(config_path)
 cfg = json.loads(content)
 app.config.update(cfg)
 
-secret_key = os.environ.get('FLASK_SECRET_KEY', None)
-if secret_key is None:
+secret_key = cfg.get('SECRET_KEY', '')
+if len(secret_key) < 24:
     secret_key = os.urandom(24)
-    print(f"No secret key is set. Randomly generating a new one: {secret_key}", file=sys.stderr)
+    print(
+        f"'secret_key' defined in config.json is too weak. "
+        f"Randomly generating a new one: {secret_key}",
+        file=sys.stderr
+    )
 app.secret_key = secret_key
 
 manager = FileSystemManager(
