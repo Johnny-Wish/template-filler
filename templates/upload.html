@@ -1,7 +1,26 @@
-<!doctype html>
-<title>Upload new File</title>
-<h1>Upload zip file</h1>
-<form method=post enctype=multipart/form-data>
-    <input type=file name=file>
-    <input type=submit value=Upload>
-</form>
+{%  extends "base.html" %}
+
+{% block title %}
+    Automated Letter Generator
+{% endblock %}
+
+{% block content %}
+    <div class="card-wrapper">
+        <div class="card">
+            <h1 class="center title">Upload Zip File</h1>
+            <form method=post enctype=multipart/form-data class="form">
+
+                <label for="file" class="fileinput">Choose Your File</label>
+                <input type=file name=file accept="application/zip" class="field" required>
+
+                <label for="pre_para_id">Insert Before Paragraph: (Default is 0)</label>
+                <input type="text" id="pre_para_id" name="pre_para_id" class="field" value="0" required>
+
+                <label for="check_error">Check for Errors</label>
+                <input type="checkbox" id="check_error" name="check_error" checked="true">
+
+                <input type=submit value=Upload class="btn btn-upload">
+            </form>
+        </div>
+    </div>
+{% endblock %}
