@@ -30,13 +30,13 @@ class FileSystemManager:
         return Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher)
 
     @staticmethod
-    def run_controller(project_root, controller):
-        writer = DocxInsertionWriter(template_path=os.path.join(project_root, "style.docx"), pre_para_id=0)
+    def run_controller(project_root, controller, pre_para_id):
+        writer = DocxInsertionWriter(template_path=os.path.join(project_root, "style.docx"), pre_para_id=pre_para_id)
         letter_dir = os.path.join(project_root, "letters")
         controller.write_to_disk(writer, output_dir=letter_dir)
         return letter_dir
 
-    def handle(self, file, filename, check=True):
+    def handle(self, file, filename, pre_para_id, check=True):
         # save uploaded zip, and get the dir
         filename = f"{get_time_str()}_{filename}"
         uploaded_zip_path = self.save_uploaded(file, filename)
@@ -52,7 +52,7 @@ class FileSystemManager:
             controller.check_texts(output="raise")
 
         # run the controller and generator docs, optionally gather error, info, debug
-        letter_dir = self.run_controller(extracted_path, controller)
+        letter_dir = self.run_controller(extracted_path, controller, pre_para_id=pre_para_id)
 
         # zip the docs folder and return download path
         download_path = os.path.join(self.DOWNLOAD_DIR, filename)
