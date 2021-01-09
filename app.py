@@ -62,7 +62,7 @@ def upload_file_and_check():
 
         if file and allowed_file(file.filename):
             check_error = (request.form.get("check_error", "off") == "on")
-            pre_para_id = request.form.get("pre_para_id", 0)
+            pre_para_id = int(request.form.get("pre_para_id", 0))
 
             filename = secure_filename(file.filename)
             download_name = manager.handle(file=file, filename=filename, pre_para_id=pre_para_id, check=check_error)
