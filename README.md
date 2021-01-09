@@ -25,10 +25,10 @@ The service runs on port 5000 by default. For security purposes, it is recommend
 
 | URL PATH              | Method | Description                                                  |
 | --------------------- | ------ | ------------------------------------------------------------ |
-| /uploads/check        | GET    | Renders a simple webpage for uploading zip file, as defined in `templates/upload.html`. |
-| /uploads/nocheck      | GET    | Same as above.                                               |
-| /uploads/check        | POST   | Uploads a zip file and performs all checking.<br />If any check fails, renders an error page with stack trace; <br />Otherwise, redirect to the download URL for the output (zipped) folder. |
-| /uploads/nocheck      | POST   | Similar to above, but no checking will be performed.<br />The error page is only rendered if an internal error is captured. |
+| `/` | GET    | Redirects to /uploads/new-letter |
+| `/uploads/new-letter` | GET    | Displays the page to upload files        |
+| `/uploads/new-letter` | POST   | Uploads a zip file and performs all checking.<br />If any check fails, renders an error page with stack trace; <br />Otherwise, redirect to the download URL for the output (zipped) folder. |
+| `/uploads/check`<br>`/uploads/nocheck` | GET | **Deprecated** redirects to `uploads/new-letter` |
 | /downloads/\<filename\> | GET    | Downloads an output (zipped) folder<br />Users are redirected here upon uploading a zip file (and all checks are passed) |
 
 ## Config
