@@ -1,3 +1,4 @@
+import re
 import requests
 from abc import ABC, abstractmethod
 
@@ -26,15 +27,21 @@ class EnglishDialectPostProcessor(PostProcessor):
     )
 
     def __init__(self, dialect):
-        self.d = requests.get(self.URLs[dialect.lower()]).json()
         self.dialect = dialect
+        d = requests.get(self.URLs[dialect.lower()]).json()
+        # Flip the key and value
+        self.d = {v: k for k, v in d.items()}
+        d_cap = {k.capitalize(): v.capitalize() for k, v in self.d.items()}
+        d_upper = {k.upper(): v.upper() for k, v in self.d.items()}
+        self.d.update(d_cap)
+        self.d.update(d_upper)
+        self.regex = '|'.join(r'\b%s\b' % re.escape(s) for s in self.d)
+
+    def _replace(self, match):
+        return self.d[match.group(0)]
 
     def process(self, content: str) -> str:
-        for new, old in self.d.items():
-            content = content.replace(old, new)
-            content = content.replace(old.capitalize(), new.capitalize())
-            content = content.replace(old.upper(), new.upper())
-        return content
+        return re.sub(self.regex, self._replace, content)
 
 
 class ApostrophePostProcessor(PostProcessor):
