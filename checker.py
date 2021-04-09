@@ -134,3 +134,30 @@ class NameChecker(Checker):
             self.update_summary(filename, f"Target first name not found: \n {old_s}")
         if not (target_last_name in s):
             self.update_summary(filename, f"Target last name not found: \n {old_s}")
+
+
+class ApostropheChecker(Checker):
+    STRAIGHT = "'"
+    CURLY = "’"
+
+    def __init__(self, preference=None, summarizers=None):
+        super().__init__(summarizers=summarizers)
+        if preference not in (None, "straight", "curly"):
+            raise ValueError("preference must be None, 'straight' or 'curly'")
+        self.preference = preference
+
+    @property
+    def other_style(self):
+        if not preference:
+            raise ValueError("No preference is set")
+        return self.STRAIGHT if self.preference == 'curly' else self.CURLY
+
+    def check(self, filename, s):
+        if not self.preference:
+            if self.STRAIGHT in s and self.CURLY in s:
+                self.update_summary(filename, "Both straight and curly apostrophes are found")
+        elif self.other_style in s:
+            self.update_summary(
+                filename,
+                f"Apostrophe preference is set to {self.preference} but {self.other_style} is found"
+            )
