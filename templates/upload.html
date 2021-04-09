@@ -1,4 +1,4 @@
-{%  extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}
     Automated Letter Generator
@@ -16,8 +16,29 @@
                 <label for="pre_para_id">Insert Before Paragraph: (Default is 0)</label>
                 <input type="text" id="pre_para_id" name="pre_para_id" class="field" value="0" required>
 
-                <label for="check_error">Check for Errors</label>
-                <input type="checkbox" id="check_error" name="check_error" checked="true">
+                <div>
+                    <b>Post-Processing Options</b>
+
+                    <label for="dialect">Dialect</label>
+                    <select id="dialect" name="dialect">
+                        <option value="">None Specified</option>
+                        <option value="ame">American English</option>
+                        <option value="bre">British English</option>
+                    </select>
+
+                    <label for="apostrophe">Apostrophe Style</label>
+                    <select id="apostrophe" name="apostrophe">
+                        <option value="">None Specified</option>
+                        <option value="straight">Straight (')</option>
+                        <option value="curly">Curly (’)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <b>Checking Options</b>
+                    <label for="check_error">Check for Errors</label>
+                    <input type="checkbox" id="check_error" name="check_error" checked="true">
+                </div>
 
                 <input type=submit value=Upload class="btn btn-upload">
             </form>
