@@ -85,9 +85,10 @@ def docx_insert_paragraph_after(paragraph, text=None, style=None):
 
 
 class DocxInsertionWriter(Writer):
-    def __init__(self, template_path, pre_para_id):
+    def __init__(self, template_path, pre_para_id, insert_before=True):
         self.template_path = template_path
         self.pre_para_id = pre_para_id
+        self.insert_before = insert_before
 
     def write(self, content, fname):
         if not fname.endswith(".docx"):
@@ -100,8 +101,12 @@ class DocxInsertionWriter(Writer):
 
         pre_para = doc.paragraphs[self.pre_para_id]
 
-        for para_text in content.split("\n")[::-1]:
-            docx_insert_paragraph_after(pre_para, text=para_text, style=style)
+        if self.insert_before:
+            for para_text in content.split("\n"):
+                pre_para.insert_paragraph_before(text=para_text, style=style)
+        else:
+            for para_text in content.split("\n")[::-1]:
+                docx_insert_paragraph_after(pre_para, text=para_text, style=style)
 
         print(f"saving to {fname}")
         doc.save(fname)
