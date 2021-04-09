@@ -2,7 +2,7 @@ import os
 import sys
 from fetcher import StudentFetcher, ProjectInfoFetcher, GenreFormer, Fetcher, FlockFetcher
 from io_utils import safe_mkdir, DocxInsertionWriter
-from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer
+from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer, ApostropheChecker
 import argparse
 
 
@@ -28,7 +28,10 @@ class Controller:
         return self.articles
 
     def get_texts(self):
-        return [article.serialize() for article in self.get_articles()]
+        return [
+            article.serialize().replace(ApostropheChecker.STRAIGHT, ApostropheChecker.CURLY)
+            for article in self.get_articles()
+        ]
 
     def write_to_disk(self, writer, output_dir):
         safe_mkdir(output_dir)
@@ -49,6 +52,7 @@ class Controller:
         placeholder_checker = PlaceholderChecker(summarizers=[summarizer])
         gender_checker = GenderChecker(summarizers=[summarizer])
         name_checker = NameChecker(all_first_names, all_last_names, summarizers=[summarizer])
+        apostrophe_checker = ApostropheChecker(summarizers=[summarizer])
 
         for content, row in zip(self.get_texts(), self.student_data):
             first_name = row['first_name'].eval().serialize()
@@ -58,10 +62,11 @@ class Controller:
             placeholder_checker.check(filename, content)
             gender_checker.check(filename, content)
             name_checker.check(filename, content, target_first_name=first_name, target_last_name=last_name)
+            apostrophe_checker.check(filename, content)
 
         summaries = summarizer.get_summaries()
         if summaries is not None:
-            summaries = f"{len(summaries)} warning(s) found:" + "\n\n".join(summaries)
+            summaries = f"{len(summaries)} warning(s) found:\n" + "\n".join(summaries)
             if output == "raise":
                 raise ValueError(summaries)
             elif output == "stderr":
