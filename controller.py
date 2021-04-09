@@ -4,7 +4,7 @@ from fetcher import StudentFetcher, ProjectInfoFetcher, GenreFormer, Fetcher, Fl
 from io_utils import safe_mkdir, DocxInsertionWriter
 from typing import Sequence
 from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer, ApostropheChecker
-from post_process import PostProcessor, compose
+from post_process import PostProcessor, compose, ApostrophePostProcessor, EnglishDialectPostProcessor
 import argparse
 
 
@@ -85,14 +85,25 @@ class Controller:
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--pre-para-id', default=0, type=int)
+    arg_parser.add_argument('--insert_before', default=True, type=bool)
+    arg_parser.add_argument('--apostrophe', default='curly', type=str)
+    arg_parser.add_argument('--dialect', default=None, type=str)
     args = arg_parser.parse_args()
+    post_processors = []
+    if args.dialect:
+        post_processors.append(EnglishDialectPostProcessor(args.dialect))
+    if args.apostrophe:
+        post_processors.append(ApostrophePostProcessor(args.apostrophe))
+
     flock_fetcher = FlockFetcher("./flock")
     program_fetcher = ProjectInfoFetcher("./program_info")
     student_fetcher = StudentFetcher(root_dir=".", name_list_path="eval.csv", flock_fetcher=flock_fetcher)
     former = GenreFormer("./genre")
 
-    writer = DocxInsertionWriter(template_path="./style.docx", pre_para_id=args.pre_para_id)
+    writer = DocxInsertionWriter(template_path="./style.docx", pre_para_id=args.pre_para_id,
+                                 insert_before=args.insert_before)
 
-    controller = Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher)
+    controller = Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher,
+                            post_processors=post_processors)
     controller.check_texts()
     controller.write_to_disk(writer=writer, output_dir="./letters")
