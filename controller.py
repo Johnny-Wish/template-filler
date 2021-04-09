@@ -2,12 +2,20 @@ import os
 import sys
 from fetcher import StudentFetcher, ProjectInfoFetcher, GenreFormer, Fetcher, FlockFetcher
 from io_utils import safe_mkdir, DocxInsertionWriter
+from typing import Sequence
 from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer, ApostropheChecker
+from post_process import PostProcessor, compose
 import argparse
 
 
 class Controller:
-    def __init__(self, genre_former: GenreFormer, student_fetcher: Fetcher, program_fetcher: Fetcher):
+    def __init__(
+            self,
+            genre_former: GenreFormer,
+            student_fetcher: Fetcher,
+            program_fetcher: Fetcher,
+            post_processors: Sequence[PostProcessor] = None
+    ):
         self.genre_former = genre_former
         self.student_fetcher = student_fetcher
         self.program_fetcher = program_fetcher
@@ -18,20 +26,16 @@ class Controller:
         self.program_data = program_fetcher.fetch(verbatim=True)
 
         self.articles = [self.genre.fill(program_fetcher.fetch()).fill(student) for student in student_fetcher.fetch()]
-        # self.articles = []
-        # for student_data in student_fetcher.fetch():
-        #     blob = self.genre.fill(program_fetcher.fetch())
-        #     blob = blob.fill(student_data)
-        #     self.articles.append(blob)
+        self.post_processor = compose(post_processors or [])
+        self._texts = None
 
     def get_articles(self):
         return self.articles
 
-    def get_texts(self):
-        return [
-            article.serialize().replace(ApostropheChecker.STRAIGHT, ApostropheChecker.CURLY)
-            for article in self.get_articles()
-        ]
+    def get_texts(self, force_rerun=False):
+        if force_rerun or self._texts is None:
+            self._texts = [self.post_processor(article.serialize()) for article in self.get_articles()]
+        return self._texts
 
     def write_to_disk(self, writer, output_dir):
         safe_mkdir(output_dir)
