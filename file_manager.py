@@ -22,12 +22,13 @@ class FileSystemManager:
         return uploaded_zip_path
 
     @staticmethod
-    def get_controller(project_root):
+    def get_controller(project_root, post_processors=None):
         flock_fetcher = FlockFetcher(os.path.join(project_root, "flock"))
         program_fetcher = ProjectInfoFetcher(os.path.join(project_root, "program_info"))
         student_fetcher = StudentFetcher(root_dir=project_root, name_list_path="eval.csv", flock_fetcher=flock_fetcher)
         former = GenreFormer(os.path.join(project_root, "genre"))
-        return Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher)
+        return Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher,
+                          post_processors=post_processors)
 
     @staticmethod
     def run_controller(project_root, controller, pre_para_id):
@@ -36,7 +37,7 @@ class FileSystemManager:
         controller.write_to_disk(writer, output_dir=letter_dir)
         return letter_dir
 
-    def handle(self, file, filename, pre_para_id, check=True):
+    def handle(self, file, filename, pre_para_id, check=True, post_processors=None):
         # save uploaded zip, and get the dir
         filename = f"{get_time_str()}_{filename}"
         uploaded_zip_path = self.save_uploaded(file, filename)
@@ -47,7 +48,7 @@ class FileSystemManager:
         os.remove(uploaded_zip_path)
 
         # instantiate a controller to handle the extracted folder
-        controller = self.get_controller(extracted_path)
+        controller = self.get_controller(extracted_path, post_processors=post_processors)
         if check:
             controller.check_texts(output="raise")
 

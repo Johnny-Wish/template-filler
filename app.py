@@ -6,6 +6,7 @@ from file_manager import FileSystemManager
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 from io_utils import read_textfile
+from post_process import EnglishDialectPostProcessor, ApostrophePostProcessor
 
 ALLOWED_EXTENSIONS = {'zip'}
 
@@ -67,9 +68,15 @@ def upload_file_and_check():
         if file and allowed_file(file.filename):
             check_error = (request.form.get("check_error", "off") == "on")
             pre_para_id = int(request.form.get("pre_para_id", 0))
+            post_processors = []
+            if request.form.get("apostrophe"):
+                post_processors.append(ApostrophePostProcessor(preference=request.form.get("apostrophe")))
+            if request.form.get("dialect"):
+                post_processors.append(EnglishDialectPostProcessor(dialect=request.form.get("dialect")))
 
             filename = secure_filename(file.filename)
-            download_name = manager.handle(file=file, filename=filename, pre_para_id=pre_para_id, check=check_error)
+            download_name = manager.handle(file=file, filename=filename, pre_para_id=pre_para_id, check=check_error,
+                                           post_processors=post_processors)
             return redirect(url_for('download_file', filename=download_name))
 
     return render_template('upload.html')
@@ -81,4 +88,4 @@ def download_file(filename):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
