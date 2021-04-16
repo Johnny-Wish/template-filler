@@ -161,3 +161,17 @@ class ApostropheChecker(Checker):
                 filename,
                 f"Apostrophe preference is set to {self.preference} but {self.other_style} is found"
             )
+
+
+class SecondPersonChecker(Checker):
+    @staticmethod
+    def window(s, span, radius=30):
+        l, r = span
+        l = max(l - radius, 0)
+        r = min(r + radius, len(s))
+        return s[l: r]
+
+    def check(self, filename, s):
+        for match in re.finditer(r"\byou\b|\byour\b", s.lower()):
+            self.update_summary(filename, f"Second person pronouns found\n: {self.window(s, match.span())}")
+
