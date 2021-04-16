@@ -56,6 +56,14 @@ class Writer:
         pass
 
 
+class TxtWriter(Writer):
+    def write(self, content, fname):
+        if not fname.endswith(".txt"):
+            fname += '.txt'
+        with open(fname, 'w') as f:
+            f.write(content)
+
+
 class DocxWriter(Writer):
     def write(self, content, fname):
         if not fname.endswith(".docx"):
