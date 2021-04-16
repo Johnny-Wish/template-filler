@@ -72,11 +72,20 @@ def upload_file_and_check():
             if request.form.get("apostrophe"):
                 post_processors.append(ApostrophePostProcessor(preference=request.form.get("apostrophe")))
             if request.form.get("dialect"):
-                post_processors.append(EnglishDialectPostProcessor(dialect=request.form.get("dialect")))
+                dialect = request.form.get('dialect')
+                post_processors.append(EnglishDialectPostProcessor(dialect=dialect))
+                if dialect.lower() == 'bre':
+                    lang = 'en-GB'
+                else:
+                    lang = 'en-US'
+            else:
+                lang = 'en-US'
+
+            check_grammar = request.form.get('check_grammar', False)
 
             filename = secure_filename(file.filename)
             download_name = manager.handle(file=file, filename=filename, pre_para_id=pre_para_id, check=check_error,
-                                           post_processors=post_processors)
+                                           post_processors=post_processors, lang=lang if check_grammar else None)
             return redirect(url_for('download_file', filename=download_name))
 
     return render_template('upload.html')

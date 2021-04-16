@@ -2,8 +2,9 @@ import os
 import shutil
 from fetcher import FlockFetcher, ProjectInfoFetcher, GenreFormer, StudentFetcher
 from controller import Controller
-from io_utils import safe_mkdir, extract_zip, zipdir, DocxInsertionWriter
+from io_utils import safe_mkdir, extract_zip, zipdir, DocxInsertionWriter, TxtWriter
 from global_utils import rreplace, get_time_str
+import language_tool_python as langtool
 
 
 class FileSystemManager:
@@ -31,13 +32,26 @@ class FileSystemManager:
                           post_processors=post_processors)
 
     @staticmethod
-    def run_controller(project_root, controller, pre_para_id):
+    def run_controller(project_root, controller, pre_para_id, lang=None):
         writer = DocxInsertionWriter(template_path=os.path.join(project_root, "style.docx"), pre_para_id=pre_para_id)
         letter_dir = os.path.join(project_root, "letters")
-        controller.write_to_disk(writer, output_dir=letter_dir)
+        if lang:
+            controller.student_fetcher.set_cache()
+            first_names = set(controller.student_fetcher.cache.first_name)
+            last_names = set(controller.student_fetcher.cache.last_name)
+            names = list(first_names.union(last_names))
+            tool = langtool.LanguageTool(
+                language=lang,
+                remote_server=os.environ.get('langtool_server', 'http://localhost:8010'),
+                newSpellings=names,
+            )
+            gwriter = TxtWriter()
+        else:
+            tool, gwriter = None, None
+        controller.write_to_disk(writer, output_dir=letter_dir, language_tool=tool, grammar_writer=gwriter)
         return letter_dir
 
-    def handle(self, file, filename, pre_para_id, check=True, post_processors=None):
+    def handle(self, file, filename, pre_para_id, check=True, post_processors=None, lang=None):
         # save uploaded zip, and get the dir
         filename = f"{get_time_str()}_{filename}"
         uploaded_zip_path = self.save_uploaded(file, filename)
@@ -53,7 +67,7 @@ class FileSystemManager:
             controller.check_texts(output="raise")
 
         # run the controller and generator docs, optionally gather error, info, debug
-        letter_dir = self.run_controller(extracted_path, controller, pre_para_id=pre_para_id)
+        letter_dir = self.run_controller(extracted_path, controller, pre_para_id, lang=lang)
 
         # zip the docs folder and return download path
         download_path = os.path.join(self.DOWNLOAD_DIR, filename)
