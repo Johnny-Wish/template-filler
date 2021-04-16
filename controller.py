@@ -65,7 +65,7 @@ class Controller:
         gender_checker = GenderChecker(summarizers=[summarizer])
         name_checker = NameChecker(all_first_names, all_last_names, summarizers=[summarizer])
         apostrophe_checker = ApostropheChecker(summarizers=[summarizer])
-        second_person_checker = SecondPersonChecker(summarizers=[summarizer])
+        # second_person_checker = SecondPersonChecker(summarizers=[summarizer])
 
         for content, row in zip(self.get_texts(), self.student_data):
             first_name = row['first_name'].eval().serialize()
@@ -76,7 +76,7 @@ class Controller:
             gender_checker.check(filename, content)
             name_checker.check(filename, content, target_first_name=first_name, target_last_name=last_name)
             apostrophe_checker.check(filename, content)
-            second_person_checker.check(filename, content)
+            # second_person_checker.check(filename, content)
 
         summaries = summarizer.get_summaries()
         if summaries is not None:
