@@ -1,11 +1,12 @@
 import os
 import sys
 from fetcher import StudentFetcher, ProjectInfoFetcher, GenreFormer, Fetcher, FlockFetcher
-from io_utils import safe_mkdir, DocxInsertionWriter
+from io_utils import safe_mkdir, DocxInsertionWriter, TxtWriter
 from typing import Sequence
 from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer, ApostropheChecker
 from post_process import PostProcessor, compose, ApostrophePostProcessor, EnglishDialectPostProcessor
 import argparse
+import language_tool_python as langtool
 
 
 class Controller:
@@ -37,7 +38,7 @@ class Controller:
             self._texts = [self.post_processor(article.serialize()) for article in self.get_articles()]
         return self._texts
 
-    def write_to_disk(self, writer, output_dir):
+    def write_to_disk(self, output_writer, output_dir, language_tool=None, grammar_writer=None):
         safe_mkdir(output_dir)
 
         for content, row in zip(self.get_texts(), self.student_data):
@@ -45,7 +46,13 @@ class Controller:
             last_name = row['last_name'].eval().serialize()
             propose_fname = f"{first_name}-{last_name}-path-letter"
             propose_fname = os.path.join(output_dir, propose_fname)
-            writer.write(content=content, fname=propose_fname)
+            output_writer.write(content=content, fname=propose_fname)
+            if language_tool and grammar_writer:
+                matches = language_tool.check(content)
+                grammar_writer.write(
+                    content='\n\n'.join(str(m) for m in matches),
+                    fname=propose_fname + '.txt',
+                )
 
     def check_texts(self, output="stderr"):
         all_first_names = [row["first_name"].eval().serialize() for row in self.student_data]
@@ -84,10 +91,11 @@ class Controller:
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--pre-para-id', default=0, type=int)
+    arg_parser.add_argument('--pre_para_id', default=0, type=int)
     arg_parser.add_argument('--insert_before', default=True, type=bool)
     arg_parser.add_argument('--apostrophe', default='curly', type=str)
     arg_parser.add_argument('--dialect', default=None, type=str)
+    arg_parser.add_argument('--langtool_server', default=None, type=str)
     args = arg_parser.parse_args()
     post_processors = []
     if args.dialect:
@@ -103,7 +111,20 @@ if __name__ == '__main__':
     writer = DocxInsertionWriter(template_path="./style.docx", pre_para_id=args.pre_para_id,
                                  insert_before=args.insert_before)
 
+    if args.langtool_server:
+        if args.dialect is None or args.dialect == 'ame':
+            language = 'en-US'
+        else:
+            language = 'en-GB'
+        student_fetcher.set_cache()
+        names = set(student_fetcher.cache.first_name).union(set(student_fetcher.cache.last_name))
+        tool = langtool.LanguageTool(language=language, remote_server=args.langtool_server, newSpellings=list(names))
+        grammar_writer = TxtWriter()
+    else:
+        tool, grammar_writer = None, None
+
     controller = Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher,
                             post_processors=post_processors)
     controller.check_texts()
-    controller.write_to_disk(writer=writer, output_dir="./letters")
+    controller.write_to_disk(output_writer=writer, output_dir="./letters", language_tool=tool,
+                             grammar_writer=grammar_writer)
