@@ -96,6 +96,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--apostrophe', default='curly', type=str)
     arg_parser.add_argument('--dialect', default=None, type=str)
     arg_parser.add_argument('--langtool_server', default=None, type=str)
+    arg_parser.add_argument('--new_spellings', default='', type=str)
     args = arg_parser.parse_args()
     post_processors = []
     if args.dialect:
@@ -118,7 +119,9 @@ if __name__ == '__main__':
             language = 'en-GB'
         student_fetcher.set_cache()
         names = set(student_fetcher.cache.first_name).union(set(student_fetcher.cache.last_name))
-        tool = langtool.LanguageTool(language=language, remote_server=args.langtool_server, newSpellings=list(names))
+        new_spellings = args.new_spellings.split() + list(names)
+        print('new spellings:', new_spellings)
+        tool = langtool.LanguageTool(language=language, remote_server=args.langtool_server, newSpellings=new_spellings)
         grammar_writer = TxtWriter()
     else:
         tool, grammar_writer = None, None
