@@ -84,8 +84,15 @@ def upload_file_and_check():
             check_grammar = request.form.get('check_grammar', False)
 
             filename = secure_filename(file.filename)
-            download_name = manager.handle(file=file, filename=filename, pre_para_id=pre_para_id, check=check_error,
-                                           post_processors=post_processors, lang=lang if check_grammar else None)
+            download_name = manager.handle(
+                file=file,
+                filename=filename,
+                pre_para_id=pre_para_id,
+                check=check_error,
+                post_processors=post_processors,
+                lang=lang if check_grammar else None,
+                new_words=request.form.get('new_words', ''),
+            )
             return redirect(url_for('download_file', filename=download_name))
 
     return render_template('upload.html')
