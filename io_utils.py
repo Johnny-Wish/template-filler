@@ -118,3 +118,12 @@ class DocxInsertionWriter(Writer):
 
         print(f"saving to {fname}")
         doc.save(fname)
+
+
+def stdio_yn(q):
+    while True:
+        a = input(str(q) + ' [y/n]\nYour Choice: ')
+        if a.strip().lower() == 'y':
+            return True
+        elif a.strip().lower() == 'n':
+            return False

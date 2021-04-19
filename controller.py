@@ -1,7 +1,7 @@
 import os
 import sys
 from fetcher import StudentFetcher, ProjectInfoFetcher, GenreFormer, Fetcher, FlockFetcher
-from io_utils import safe_mkdir, DocxInsertionWriter, TxtWriter
+from io_utils import safe_mkdir, DocxInsertionWriter, TxtWriter, stdio_yn
 from typing import Sequence
 from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummarizer, ApostropheChecker, \
     SecondPersonChecker
@@ -39,7 +39,7 @@ class Controller:
             self._texts = [self.post_processor(article.serialize()) for article in self.get_articles()]
         return self._texts
 
-    def write_to_disk(self, output_writer, output_dir, language_tool=None, grammar_writer=None):
+    def write_to_disk(self, output_writer, output_dir, language_tool=None, grammar_writer=None, match_policy='all'):
         safe_mkdir(output_dir)
 
         for content, row in zip(self.get_texts(), self.student_data):
@@ -50,12 +50,35 @@ class Controller:
             output_writer.write(content=content, fname=propose_fname)
             if language_tool and grammar_writer:
                 matches = language_tool.check(content)
-                grammar_writer.write(
-                    content='\n\n'.join(str(m) for m in matches),
-                    fname=propose_fname + '.txt',
-                )
-                correction = langtool.utils.correct(content, matches)
-                output_writer.write(content=correction, fname=propose_fname + '-proposed-correction')
+                if match_policy == 'ask':
+                    applied_matches = []
+                    unapplied_matches = []
+                    for m in matches:
+                        if stdio_yn(str(m) + '\nAccept the above suggestion?'):
+                            applied_matches.append(m)
+                        else:
+                            unapplied_matches.append(m)
+                elif match_policy == 'all':
+                    applied_matches = matches
+                    unapplied_matches = []
+                elif match_policy == 'none':
+                    applied_matches = []
+                    unapplied_matches = matches
+                else:
+                    raise RuntimeError(f"Unknown matches policy: {match_policy}")
+
+                if applied_matches:
+                    correction = langtool.utils.correct(content, applied_matches)
+                    output_writer.write(content=correction, fname=propose_fname + '-correction')
+                    grammar_writer.write(
+                        content='\n\n'.join(str(m) for m in applied_matches),
+                        fname=propose_fname + '-applied-matches.txt',
+                    )
+                if unapplied_matches:
+                    grammar_writer.write(
+                        content='\n\n'.join(str(m) for m in unapplied_matches),
+                        fname=propose_fname + '-unapplied-matches.txt',
+                    )
 
     def check_texts(self, output="stderr"):
         all_first_names = [row["first_name"].eval().serialize() for row in self.student_data]
@@ -102,6 +125,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--dialect', default=None, type=str)
     arg_parser.add_argument('--langtool_server', default=None, type=str)
     arg_parser.add_argument('--new_spellings', default='', type=str)
+    arg_parser.add_argument('--match_policy', default='ask', type=str)
     args = arg_parser.parse_args()
     post_processors = []
     if args.dialect:
@@ -135,4 +159,4 @@ if __name__ == '__main__':
                             post_processors=post_processors)
     controller.check_texts()
     controller.write_to_disk(output_writer=writer, output_dir="./letters", language_tool=tool,
-                             grammar_writer=grammar_writer)
+                             grammar_writer=grammar_writer, match_policy=args.match_policy)
