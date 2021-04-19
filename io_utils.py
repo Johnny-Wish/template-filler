@@ -62,6 +62,7 @@ class Writer:
 class TxtWriter(Writer):
     def write(self, content, fname):
         self._safe_mkdir(fname)
+        fname = str(fname)
         if not fname.endswith(".txt"):
             fname += '.txt'
         with open(fname, 'w') as f:
@@ -71,6 +72,7 @@ class TxtWriter(Writer):
 class DocxWriter(Writer):
     def write(self, content, fname):
         self._safe_mkdir(fname)
+        fname = str(fname)
         if not fname.endswith(".docx"):
             fname += ".docx"
         doc = Document()
@@ -105,6 +107,7 @@ class DocxInsertionWriter(Writer):
 
     def write(self, content, fname):
         self._safe_mkdir(fname)
+        fname = str(fname)
         if not fname.endswith(".docx"):
             fname += ".docx"
         doc = Document(self.template_path)

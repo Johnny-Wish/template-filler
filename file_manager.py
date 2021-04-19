@@ -34,7 +34,7 @@ class FileSystemManager:
     @staticmethod
     def run_controller(project_root, controller, pre_para_id, lang=None, new_words=''):
         writer = DocxInsertionWriter(template_path=os.path.join(project_root, "style.docx"), pre_para_id=pre_para_id)
-        letter_dir = os.path.join(project_root, "letters")
+        output_dir = os.path.join(project_root, "output")
         if lang:
             controller.student_fetcher.set_cache()
             first_names = set(controller.student_fetcher.cache.first_name)
@@ -44,14 +44,15 @@ class FileSystemManager:
             print('new spellings:', new_spellings)
             tool = langtool.LanguageTool(
                 language=lang,
-                remote_server=os.environ.get('langtool_server', 'http://localhost:8010'),
+                remote_server=os.environ.get('LANGTOOL_SERVER', 'http://localhost:8010'),
                 newSpellings=new_spellings,
             )
             gwriter = TxtWriter()
         else:
             tool, gwriter = None, None
-        controller.write_to_disk(writer, output_dir=letter_dir, language_tool=tool, grammar_writer=gwriter)
-        return letter_dir
+        controller.write_to_disk(writer, output_dir=output_dir, language_tool=tool, grammar_writer=gwriter,
+                                 match_policy='all')
+        return output_dir
 
     def handle(self, file, filename, pre_para_id, check=True, post_processors=None, lang=None, new_words=''):
         # save uploaded zip, and get the dir
@@ -69,11 +70,11 @@ class FileSystemManager:
             controller.check_texts(output="raise")
 
         # run the controller and generator docs, optionally gather error, info, debug
-        letter_dir = self.run_controller(extracted_path, controller, pre_para_id, lang=lang, new_words=new_words)
+        output_dir = self.run_controller(extracted_path, controller, pre_para_id, lang=lang, new_words=new_words)
 
         # zip the docs folder and return download path
         download_path = os.path.join(self.DOWNLOAD_DIR, filename)
-        zipdir(letter_dir, download_path)
+        zipdir(output_dir, download_path)
         shutil.rmtree(extracted_path)
 
         return filename

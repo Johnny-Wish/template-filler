@@ -8,6 +8,7 @@ from checker import NameChecker, GenderChecker, PlaceholderChecker, CheckSummari
 from post_process import PostProcessor, compose, ApostrophePostProcessor, EnglishDialectPostProcessor
 import argparse
 import language_tool_python as langtool
+from pathlib import Path
 
 
 class Controller:
@@ -40,14 +41,14 @@ class Controller:
         return self._texts
 
     def write_to_disk(self, output_writer, output_dir, language_tool=None, grammar_writer=None, match_policy='all'):
+        output_dir = Path(output_dir)
         safe_mkdir(output_dir)
 
         for content, row in zip(self.get_texts(), self.student_data):
             first_name = row['first_name'].eval().serialize()
             last_name = row['last_name'].eval().serialize()
-            propose_fname = f"{first_name}-{last_name}-path-letter"
-            propose_fname = os.path.join(output_dir, propose_fname)
-            output_writer.write(content=content, fname=propose_fname)
+            proposed_fname = f"{first_name}-{last_name}-path-letter"
+            output_writer.write(content=content, fname=output_dir / 'original-letters' / proposed_fname)
             if language_tool and grammar_writer:
                 matches = language_tool.check(content)
                 if match_policy == 'ask':
@@ -69,15 +70,15 @@ class Controller:
 
                 if applied_matches:
                     correction = langtool.utils.correct(content, applied_matches)
-                    output_writer.write(content=correction, fname=propose_fname + '-correction')
+                    output_writer.write(content=correction, fname=output_dir / 'corrected-letters' / proposed_fname)
                     grammar_writer.write(
                         content='\n\n'.join(str(m) for m in applied_matches),
-                        fname=propose_fname + '-applied-matches.txt',
+                        fname=output_dir / 'applied' / proposed_fname,
                     )
                 if unapplied_matches:
                     grammar_writer.write(
                         content='\n\n'.join(str(m) for m in unapplied_matches),
-                        fname=propose_fname + '-unapplied-matches.txt',
+                        fname=output_dir / 'unapplied' / proposed_fname,
                     )
 
     def check_texts(self, output="stderr"):
@@ -158,5 +159,5 @@ if __name__ == '__main__':
     controller = Controller(genre_former=former, student_fetcher=student_fetcher, program_fetcher=program_fetcher,
                             post_processors=post_processors)
     controller.check_texts()
-    controller.write_to_disk(output_writer=writer, output_dir="./letters", language_tool=tool,
+    controller.write_to_disk(output_writer=writer, output_dir="./output", language_tool=tool,
                              grammar_writer=grammar_writer, match_policy=args.match_policy)
