@@ -51,6 +51,9 @@ def zipdir(src, dest):
 
 
 class Writer:
+    def _safe_mkdir(self, fname):
+        safe_mkdir(os.path.dirname(fname) or '.')
+
     @abstractmethod
     def write(self, content, fname):
         pass
@@ -58,6 +61,7 @@ class Writer:
 
 class TxtWriter(Writer):
     def write(self, content, fname):
+        self._safe_mkdir(fname)
         if not fname.endswith(".txt"):
             fname += '.txt'
         with open(fname, 'w') as f:
@@ -66,6 +70,7 @@ class TxtWriter(Writer):
 
 class DocxWriter(Writer):
     def write(self, content, fname):
+        self._safe_mkdir(fname)
         if not fname.endswith(".docx"):
             fname += ".docx"
         doc = Document()
@@ -99,6 +104,7 @@ class DocxInsertionWriter(Writer):
         self.insert_before = insert_before
 
     def write(self, content, fname):
+        self._safe_mkdir(fname)
         if not fname.endswith(".docx"):
             fname += ".docx"
         doc = Document(self.template_path)
