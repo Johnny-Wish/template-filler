@@ -54,6 +54,8 @@ class Controller:
                     content='\n\n'.join(str(m) for m in matches),
                     fname=propose_fname + '.txt',
                 )
+                correction = langtool.utils.correct(content, matches)
+                output_writer.write(content=correction, fname=propose_fname + '-proposed-correction')
 
     def check_texts(self, output="stderr"):
         all_first_names = [row["first_name"].eval().serialize() for row in self.student_data]
