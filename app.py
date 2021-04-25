@@ -83,7 +83,7 @@ def upload_file_and_check():
 
             check_grammar = request.form.get('check_grammar', False)
 
-            filename = secure_filename(file.filename)
+            filename = file.filename.split('/')[-1]
             download_name = manager.handle(
                 file=file,
                 filename=filename,
