@@ -9,6 +9,7 @@ from parser import Parser, nonempty_segments
 from blob import get_block_constructor, Block, Atom, get_blank
 from global_utils import capitalize
 from data import AtomicData
+from collections import Counter, defaultdict
 
 
 class Fetcher:
@@ -25,24 +26,50 @@ class Fetcher:
 
 
 class FlockFetcher(Fetcher):
-    def sample(self, col, cls, n_samples=1, replace=False, p=None):
+    def __init__(self, root_dir):
+        super(FlockFetcher, self).__init__(root_dir=root_dir)
+        self.mutex_counters = defaultdict(Counter)
+
+    def clear_cache(self):
+        super(FlockFetcher, self).clear_cache()
+        self.mutex_counters = defaultdict(Counter)
+
+    def sample(self, col, cls, mutex=None):
         fpath = os.path.join(self.root_dir, col, cls + ".txt")
         if fpath in self.cache:
             possibilities = self.cache[fpath]
         else:
             text = read_textfile(fpath)
-            possibilities = [poss.strip() for poss in text.split('\n') if len(poss.strip()) != 0]
+            possibilities = {poss.strip() for poss in text.split('\n') if len(poss.strip()) != 0}
             self.cache[fpath] = possibilities
 
-        if n_samples is None:
-            return possibilities
-        else:
-            return np.random.choice(possibilities, n_samples, replace=replace, p=p)
+        if not mutex:
+            return np.random.choice(list(possibilities))
 
-    def fetch(self, tag, col, cls, n_samples=1, replace=False, p=None, sample_type='paragraph', wrap_with="block"):
+        counter = self.mutex_counters[(mutex, col, cls)]
+
+        if list(counter.elements()):
+            assert max(counter.values()) - min(counter.values()) <= 1
+            _, most_used_value = counter.most_common(n=1)[0]
+            most_used_keys = {k for k, v in counter.items() if v == most_used_value}
+        else:
+            most_used_keys = set()
+
+        new_possibilities = possibilities - most_used_keys
+        print(f'using mutex = {mutex}, {len(new_possibilities)}/{len(possibilities)} possibilities remain')
+        if not new_possibilities:
+            print(f'Warning: choices drained for mutex == {mutex}, col == {col}, cls == {cls}')
+            new_possibilities = possibilities
+
+        choice = np.random.choice(list(new_possibilities))
+        counter[choice] += 1
+
+        return choice
+
+    def fetch(self, tag, col, cls, sample_type='paragraph', wrap_with="block", mutex=None):
+        sample = self.sample(col, cls, mutex)
         parser = Parser()
-        samples = self.sample(col, cls, n_samples=n_samples, replace=replace, p=p)
-        parsed_samples = [parser.parse(s, ret_type=sample_type) for s in samples]
+        parsed_samples = [parser.parse(sample, ret_type=sample_type)]
         block_constructor = get_block_constructor(wrap_with)
         return {tag: block_constructor(parsed_samples, atomic=False)}
 
@@ -168,8 +195,12 @@ class StudentFetcher(Fetcher):
             prefix = 'para'
         else:
             raise ValueError(f"Unrecognized type = {type}")
+        mutex = row.get('mutex')
+        if mutex:
+            mutex = str(mutex).strip()
 
-        return self.flock_fetcher.fetch(tag=f'{prefix}_{col}', col=col, cls=row[col].lower(), wrap_with='paragraph')
+        return self.flock_fetcher.fetch(tag=f'{prefix}_{col}', col=col, cls=row[col].lower(), wrap_with='paragraph',
+                                        mutex=mutex)
 
     def fetch_row(self, row):
         d = {
