@@ -56,9 +56,10 @@ class FlockFetcher(Fetcher):
             most_used_keys = set()
 
         new_possibilities = possibilities - most_used_keys
-        print(f'using mutex = {mutex}, {len(new_possibilities)}/{len(possibilities)} possibilities remain')
+        print(f'Using mutex = {mutex}, {len(new_possibilities)}/{len(possibilities)} available '
+              f'for {col.capitalize()}-{cls.capitalize()}')
         if not new_possibilities:
-            print(f'Warning: choices drained for mutex == {mutex}, col == {col}, cls == {cls}')
+            print(f'Warning: choices drained for mutex == {mutex}, col == {col}, cls == {cls}, ')
             new_possibilities = possibilities
 
         choice = np.random.choice(list(new_possibilities))

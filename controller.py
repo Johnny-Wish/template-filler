@@ -28,7 +28,7 @@ class Controller:
         self.student_data = student_fetcher.fetch()
         self.program_data = program_fetcher.fetch(verbatim=True)
 
-        self.articles = [self.genre.fill(program_fetcher.fetch()).fill(student) for student in student_fetcher.fetch()]
+        self.articles = [self.genre.fill(program_fetcher.fetch()).fill(student) for student in self.student_data]
         self.post_processor = compose(*(post_processors or []))
         self._texts = None
 
