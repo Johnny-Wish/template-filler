@@ -2,8 +2,9 @@ import json
 import sys
 import os
 import warnings
+import traceback
 from file_manager import FileSystemManager
-from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
+from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 from io_utils import read_textfile
 from post_process import EnglishDialectPostProcessor, ApostrophePostProcessor
@@ -96,6 +97,12 @@ def upload_file_and_check():
             return redirect(url_for('download_file', filename=download_name))
 
     return render_template('upload.html')
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    tb_str = str(traceback.format_exc())
+    return jsonify({'error': 'Check your uploaded file again', 'error_traceback': tb_str}), 500
 
 
 @app.route('/downloads/<filename>')
