@@ -33,7 +33,7 @@ The service runs on port 5000 by default. For security purposes, it is recommend
 
 ## Config
 
-Configurations are specified, in json format, in `config.json`. To override the default location of configs, set a `TEMPLATE_FILLER_CONFIG` environment variable, e.g.,
+Configurations are specified in `config.json`. To override the default location of configs, set a `TEMPLATE_FILLER_CONFIG` environment variable, e.g.,
 
 ```bash
 export TEMPLATE_FILLER_CONFIG="/tmp/config.json"
